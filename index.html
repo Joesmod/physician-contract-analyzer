@@ -1,146 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physician Contract Analyzer - Don't Sign What You Don't Understand</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1a1a1a; }
-        .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
-        
-        header { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); color: white; padding: 80px 0 60px; text-align: center; }
-        header h1 { font-size: 2.5rem; margin-bottom: 20px; font-weight: 700; }
-        header p { font-size: 1.25rem; opacity: 0.9; max-width: 600px; margin: 0 auto; }
-        
-        .problem { padding: 60px 0; background: #f8f9fa; }
-        .problem h2 { font-size: 1.75rem; margin-bottom: 30px; color: #1e3a5f; }
-        .problem ul { list-style: none; }
-        .problem li { padding: 15px 0 15px 30px; position: relative; border-bottom: 1px solid #e9ecef; }
-        .problem li:before { content: "⚠️"; position: absolute; left: 0; }
-        .problem li strong { color: #c0392b; }
-        
-        .how-it-works { padding: 60px 0; }
-        .how-it-works h2 { font-size: 1.75rem; margin-bottom: 40px; color: #1e3a5f; text-align: center; }
-        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; }
-        .step { text-align: center; padding: 30px 20px; background: #f8f9fa; border-radius: 12px; }
-        .step-number { width: 50px; height: 50px; background: #1e3a5f; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin: 0 auto 20px; }
-        .step h3 { margin-bottom: 10px; color: #1e3a5f; }
-        
-        .pricing { padding: 60px 0; background: #1e3a5f; color: white; }
-        .pricing h2 { font-size: 1.75rem; margin-bottom: 40px; text-align: center; }
-        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .price-card { background: white; color: #1a1a1a; padding: 30px; border-radius: 12px; text-align: center; }
-        .price-card.featured { transform: scale(1.05); box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
-        .price-card h3 { color: #1e3a5f; margin-bottom: 10px; }
-        .price { font-size: 2.5rem; font-weight: 700; color: #1e3a5f; margin: 20px 0; }
-        .price-card ul { text-align: left; list-style: none; margin: 20px 0; }
-        .price-card li { padding: 8px 0; padding-left: 25px; position: relative; }
-        .price-card li:before { content: "✓"; position: absolute; left: 0; color: #27ae60; font-weight: bold; }
-        
-        .cta { padding: 80px 0; text-align: center; background: #f8f9fa; }
-        .cta h2 { font-size: 2rem; margin-bottom: 20px; color: #1e3a5f; }
-        .cta p { margin-bottom: 30px; color: #666; }
-        .btn { display: inline-block; background: #27ae60; color: white; padding: 18px 40px; font-size: 1.1rem; text-decoration: none; border-radius: 8px; font-weight: 600; transition: background 0.3s; }
-        .btn:hover { background: #219a52; }
-        
-        footer { padding: 40px 0; text-align: center; color: #666; font-size: 0.9rem; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physician Contract Analyzer — Don't Sign What You Don't Understand</title>
+  <meta name="description" content="AI-powered physician contract review. Get a plain-English report on compensation, malpractice, non-competes, and hidden risks in 24 hours.">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>Don't Sign a Physician Contract You Don't Fully Understand.</h1>
-            <p>Your employment contract is the most consequential financial document of your career. Most physicians sign it without knowing what's buried inside.</p>
-        </div>
-    </header>
 
-    <section class="problem">
-        <div class="container">
-            <h2>Here's What's at Stake</h2>
-            <ul>
-                <li><strong>Tail coverage traps</strong> — Claims-made malpractice insurance could leave you owing $50,000–$200,000+ when you leave.</li>
-                <li><strong>Non-compete clauses</strong> — A 25-mile, 2-year non-compete could force you to uproot your family or sit idle.</li>
-                <li><strong>Termination without cause</strong> — Your employer can end with 90 days' notice. Can you? What happens to your tail, your bonus?</li>
-                <li><strong>RVU thresholds & productivity traps</strong> — Benchmarks that are unrealistic or change at employer's discretion.</li>
-                <li><strong>Liquidated damages</strong> — Penalties of $100K+ if you leave early. Even if they fire you.</li>
-            </ul>
-        </div>
-    </section>
+<!-- Nav -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav-logo">Contract<span>MD</span></a>
+  <div class="nav-links" id="navLinks">
+    <a href="#problem">The Problem</a>
+    <a href="#how">How It Works</a>
+    <a href="#analyze">What We Analyze</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#cta" class="nav-cta">Upload Contract</a>
+  </div>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
 
-    <section class="how-it-works">
-        <div class="container">
-            <h2>How It Works</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Upload Your Contract</h3>
-                    <p>Upload your PDF. Encrypted and never shared.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>AI Extracts Key Terms</h3>
-                    <p>We identify every material clause: compensation, malpractice, termination, non-compete, and more.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Get Your Report</h3>
-                    <p>Detailed analysis with flagged risks, benchmarks, and negotiation talking points.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="container">
+    <h1>Don't Sign a Physician Contract You <span class="highlight">Don't Fully Understand.</span></h1>
+    <p>Your employment contract is the most consequential financial document of your career. Most physicians sign it without knowing what's buried inside.</p>
+    <a href="#cta" class="btn-primary">Upload Your Contract →</a>
+    <div class="hero-sub">🔒 Encrypted &amp; confidential — your contract is never shared</div>
+  </div>
+</section>
 
-    <section class="pricing">
-        <div class="container">
-            <h2>Pricing</h2>
-            <div class="pricing-grid">
-                <div class="price-card">
-                    <h3>Standard Review</h3>
-                    <div class="price">$500</div>
-                    <ul>
-                        <li>Full AI-powered analysis</li>
-                        <li>Plain-English report</li>
-                        <li>Industry benchmarking</li>
-                        <li>Delivered within 24 hours</li>
-                    </ul>
-                </div>
-                <div class="price-card featured">
-                    <h3>Comprehensive</h3>
-                    <div class="price">$1,200</div>
-                    <ul>
-                        <li>Everything in Standard</li>
-                        <li>Same business day delivery</li>
-                        <li>Negotiation strategy memo</li>
-                        <li>One follow-up analysis</li>
-                    </ul>
-                </div>
-                <div class="price-card">
-                    <h3>Premium</h3>
-                    <div class="price">$2,000</div>
-                    <ul>
-                        <li>Everything in Comprehensive</li>
-                        <li>Compare up to 3 contracts</li>
-                        <li>30-minute consultation call</li>
-                        <li>Unlimited revision analysis</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- Problem -->
+<section class="problem" id="problem">
+  <div class="container">
+    <h2 class="section-title">The Problem</h2>
+    <p class="section-subtitle">You spent 11+ years training to practice medicine. No one spent a single hour teaching you how to read an employment contract. These contracts protect the employer — not you.</p>
+    <div class="problem-grid">
+      <div class="risk-card">
+        <h3>💸 Tail Coverage Traps</h3>
+        <p>If your contract uses claims-made malpractice insurance and you leave (or get terminated), you may owe <strong>$50,000–$200,000+</strong> for tail coverage.</p>
+      </div>
+      <div class="risk-card">
+        <h3>📍 Non-Compete Clauses</h3>
+        <p>A 25-mile, 2-year non-compete could force you to uproot your family or sit idle.</p>
+      </div>
+      <div class="risk-card">
+        <h3>⚖️ Termination Without Cause</h3>
+        <p>Your employer can end the contract with 90 days' notice. Can you do the same?</p>
+      </div>
+      <div class="risk-card">
+        <h3>📊 RVU &amp; Productivity Traps</h3>
+        <p>Compensation tied to wRVUs sounds straightforward until benchmarks are unrealistic.</p>
+      </div>
+      <div class="risk-card">
+        <h3>🚨 Liquidated Damages</h3>
+        <p>Some contracts include penalties of <strong>$100K+</strong> if you leave before the term expires.</p>
+      </div>
+      <div class="risk-card">
+        <h3>🔍 Vague Language</h3>
+        <p>"Reasonable efforts," "as determined by the Board" — these give the employer unilateral control.</p>
+      </div>
+    </div>
+    <div class="problem-footer">
+      The average physician contract review attorney charges <strong>$500–$1,500</strong> and takes <strong>2–3 weeks</strong>. We deliver in 24 hours.
+    </div>
+  </div>
+</section>
 
-    <section class="cta">
-        <div class="container">
-            <h2>Ready to Understand Your Contract?</h2>
-            <p>Encrypted, confidential, never shared. Most reports delivered within 24 hours.</p>
-            <a href="#upload" class="btn">Upload Your Contract →</a>
-        </div>
-    </section>
+<!-- How It Works -->
+<section id="how">
+  <div class="container">
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-subtitle">Three simple steps to understand every clause in your contract.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Upload Your Contract</h3>
+        <p>PDF or Word — encrypted and never shared with anyone.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>AI Extracts Key Terms</h3>
+        <p>Compensation, benefits, malpractice, termination, non-compete, tail coverage, call obligations, RVU targets, and more.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Get Your Plain-English Report</h3>
+        <p>Flags high-risk clauses, benchmarks against industry standards, highlights missing protections, and provides negotiation talking points.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <footer>
-        <div class="container">
-            <p>© 2026 Physician Contract Analyzer. Built by physicians, for physicians.</p>
-        </div>
-    </footer>
+<!-- What We Analyze -->
+<section class="analyze" id="analyze">
+  <div class="container">
+    <h2 class="section-title">What We Analyze</h2>
+    <p class="section-subtitle">Every critical section of your contract, examined and explained.</p>
+    <div class="analyze-grid">
+      <div class="analyze-item">
+        <div class="analyze-icon">💰</div>
+        <div><h3>Compensation</h3><p>Base salary, RVU formulas, bonus structures, productivity thresholds</p></div>
+      </div>
+      <div class="analyze-item">
+        <div class="analyze-icon">🛡️</div>
+        <div><h3>Malpractice</h3><p>Claims-made vs. occurrence, tail coverage responsibility, coverage limits</p></div>
+      </div>
+      <div class="analyze-item">
+        <div class="analyze-icon">🚪</div>
+        <div><h3>Termination</h3><p>Without-cause provisions, notice periods, cure periods</p></div>
+      </div>
+      <div class="analyze-item">
+        <div class="analyze-icon">🔒</div>
+        <div><h3>Restrictive Covenants</h3><p>Non-compete radius/duration, non-solicitation, enforceability</p></div>
+      </div>
+      <div class="analyze-item">
+        <div class="analyze-icon">🏖️</div>
+        <div><h3>Benefits</h3><p>PTO, CME, retirement match, signing bonus clawbacks</p></div>
+      </div>
+      <div class="analyze-item">
+        <div class="analyze-icon">📞</div>
+        <div><h3>Call &amp; Schedule</h3><p>Call frequency, weekend obligations, moonlighting rights</p></div>
+      </div>
+      <div class="analyze-item">
+        <div class="analyze-icon">📋</div>
+        <div><h3>Term &amp; Renewal</h3><p>Auto-renewal traps, renegotiation windows, liquidated damages</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing">
+  <div class="container">
+    <h2 class="section-title">Pricing</h2>
+    <p class="section-subtitle">Transparent pricing. No hidden fees. Results in hours, not weeks.</p>
+    <div class="pricing-cards">
+      <div class="price-card">
+        <h3>Standard Review</h3>
+        <div class="price-amount">$500</div>
+        <ul>
+          <li>Full AI analysis</li>
+          <li>Plain-English report</li>
+          <li>Industry benchmarking</li>
+          <li>24-hour delivery</li>
+        </ul>
+        <a href="#cta" class="btn-primary">Get Started</a>
+      </div>
+      <div class="price-card featured">
+        <h3>Comprehensive Review</h3>
+        <div class="price-amount">$1,200</div>
+        <ul>
+          <li>Everything in Standard</li>
+          <li>Same-day turnaround</li>
+          <li>Negotiation strategy memo</li>
+          <li>One follow-up analysis</li>
+        </ul>
+        <a href="#cta" class="btn-primary">Get Started</a>
+      </div>
+      <div class="price-card">
+        <h3>Premium Review</h3>
+        <div class="price-amount">$2,000</div>
+        <ul>
+          <li>Everything in Comprehensive</li>
+          <li>Compare up to 3 contracts</li>
+          <li>30-min consultation call</li>
+          <li>Unlimited revisions</li>
+        </ul>
+        <a href="#cta" class="btn-primary">Get Started</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="container">
+    <h2>Ready to Understand Your Contract?</h2>
+    <p>Upload your contract now. Encrypted, confidential, never shared.</p>
+    <a href="#" class="btn-primary">Upload Your Contract →</a>
+    <div class="trust-badges">
+      <span>🔒 256-bit Encryption</span>
+      <span>🕐 24hr Delivery</span>
+      <span>🤝 100% Confidential</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 ContractMD. All rights reserved. This service does not constitute legal advice.</p>
+</footer>
+
+<script>
+// Sticky nav shadow
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 10);
+});
+
+// Mobile menu
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+// Close mobile menu on link click
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.remove('open');
+  });
+});
+</script>
 </body>
 </html>
