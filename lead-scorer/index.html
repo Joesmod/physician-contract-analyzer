@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Scorer — AI Integration Consulting</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>🎯 Lead Scorer</h1>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-secondary" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
+  </div>
+</header>
+
+<div class="stats-bar" id="stats"></div>
+
+<div class="layout">
+  <!-- Input Form -->
+  <div class="panel">
+    <h2>Add Lead</h2>
+    <form id="leadForm" onsubmit="return addLead(event)">
+      <div class="form-group">
+        <label>Company Name *</label>
+        <input id="f_name" required placeholder="Acme Manufacturing">
+      </div>
+      <div class="form-group">
+        <label>Employee Count *</label>
+        <input id="f_employees" type="number" required min="1" placeholder="150">
+      </div>
+      <div class="form-group">
+        <label>Industry *</label>
+        <select id="f_industry" required>
+          <option value="">Select…</option>
+          <option value="manufacturing">Manufacturing</option>
+          <option value="logistics">Logistics & Distribution</option>
+          <option value="construction">Construction</option>
+          <option value="food_production">Food Production</option>
+          <option value="healthcare">Healthcare</option>
+          <option value="professional_services">Professional Services</option>
+          <option value="retail">Retail</option>
+          <option value="real_estate">Real Estate</option>
+          <option value="finance">Finance & Insurance</option>
+          <option value="education">Education</option>
+          <option value="tech">Technology</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Estimated Revenue ($M) *</label>
+        <input id="f_revenue" type="number" required min="0" step="0.1" placeholder="25">
+      </div>
+      <div class="form-group">
+        <label>City *</label>
+        <input id="f_city" required placeholder="Chicago">
+      </div>
+      <div class="form-group">
+        <label>Notes (manual processes observed)</label>
+        <textarea id="f_notes" placeholder="Still using paper forms for inspection checklists…"></textarea>
+      </div>
+      <div id="preview" class="score-breakdown"></div>
+      <div class="btn-row">
+        <button type="submit" class="btn btn-primary" style="flex:1">Add Lead</button>
+        <button type="button" class="btn btn-secondary" onclick="previewScore()">Preview Score</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Leads Table -->
+  <div class="panel" style="overflow-x:auto">
+    <div class="leads-header">
+      <h2>Leads</h2>
+      <span id="leadCount" style="font-size:.82rem;color:var(--text-dim)"></span>
+    </div>
+    <div id="tableWrap"></div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'lead_scorer_data';
+
+const INDUSTRY_SCORES = {
+  manufacturing: { fit: 10, manual: 10 },
+  logistics: { fit: 9, manual: 9 },
+  construction: { fit: 9, manual: 9 },
+  food_production: { fit: 10, manual: 10 },
+  healthcare: { fit: 7, manual: 7 },
+  professional_services: { fit: 5, manual: 5 },
+  retail: { fit: 6, manual: 6 },
+  real_estate: { fit: 5, manual: 5 },
+  finance: { fit: 4, manual: 4 },
+  education: { fit: 4, manual: 5 },
+  tech: { fit: 2, manual: 2 },
+  other: { fit: 5, manual: 5 },
+};
+
+const INDUSTRY_LABELS = {
+  manufacturing: 'Manufacturing', logistics: 'Logistics & Distribution',
+  construction: 'Construction', food_production: 'Food Production',
+  healthcare: 'Healthcare', professional_services: 'Professional Services',
+  retail: 'Retail', real_estate: 'Real Estate', finance: 'Finance & Insurance',
+  education: 'Education', tech: 'Technology', other: 'Other'
+};
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
+}
+function save(leads) { localStorage.setItem(STORAGE_KEY, JSON.stringify(leads)); }
+
+function calcScore(emp, industry, rev, city) {
+  // Company size: sweet spot 50-500
+  let size;
+  if (emp >= 50 && emp <= 500) size = 10;
+  else if (emp >= 20 && emp < 50) size = 7;
+  else if (emp > 500 && emp <= 1000) size = 6;
+  else if (emp > 1000 && emp <= 2000) size = 4;
+  else if (emp < 20) size = 3;
+  else size = 2;
+
+  const ind = INDUSTRY_SCORES[industry] || { fit: 5, manual: 5 };
+
+  // Revenue: sweet spot $5-50M
+  let revScore;
+  if (rev >= 5 && rev <= 50) revScore = 10;
+  else if (rev > 50 && rev <= 100) revScore = 7;
+  else if (rev >= 2 && rev < 5) revScore = 6;
+  else if (rev > 100 && rev <= 200) revScore = 4;
+  else if (rev < 2) revScore = 3;
+  else revScore = 2;
+
+  // Geo
+  const c = city.toLowerCase().trim();
+  let geo = 3;
+  if (c === 'chicago' || c.includes('chicago')) geo = 10;
+  else if (c.includes('los angeles') || c === 'la') geo = 7;
+  else if (c.includes('new york') || c === 'nyc' || c === 'ny') geo = 7;
+  else if (['houston','dallas','phoenix','philadelphia','san antonio','denver','seattle','boston','atlanta','miami','detroit','minneapolis','st. louis','indianapolis','milwaukee','columbus','cleveland','cincinnati','kansas city','nashville','memphis','louisville','portland','pittsburgh'].includes(c)) geo = 5;
+
+  const breakdown = { size, industry: ind.fit, manual: ind.manual, revenue: revScore, geo };
+  // Weighted composite: size 20%, industry 25%, manual 25%, revenue 15%, geo 15%
+  const composite = Math.round(
+    size * 2 + ind.fit * 2.5 + ind.manual * 2.5 + revScore * 1.5 + geo * 1.5
+  );
+  return { composite: Math.min(100, Math.max(1, composite)), breakdown };
+}
+
+function scoreClass(s) { return s >= 70 ? 'score-green' : s >= 45 ? 'score-yellow' : 'score-red'; }
+function priorityLabel(s) {
+  if (s >= 70) return '<span class="priority-tag" style="color:var(--green)">🟢 High Priority</span>';
+  if (s >= 45) return '<span class="priority-tag" style="color:var(--yellow)">🟡 Medium</span>';
+  return '<span class="priority-tag" style="color:var(--red)">🔴 Low</span>';
+}
+
+function getFormData() {
+  return {
+    name: document.getElementById('f_name').value.trim(),
+    employees: parseInt(document.getElementById('f_employees').value),
+    industry: document.getElementById('f_industry').value,
+    revenue: parseFloat(document.getElementById('f_revenue').value),
+    city: document.getElementById('f_city').value.trim(),
+    notes: document.getElementById('f_notes').value.trim(),
+  };
+}
+
+function previewScore() {
+  const d = getFormData();
+  if (!d.name || !d.employees || !d.industry || !d.revenue || !d.city) return;
+  const { composite, breakdown } = calcScore(d.employees, d.industry, d.revenue, d.city);
+  const el = document.getElementById('preview');
+  el.classList.add('visible');
+  el.innerHTML = `
+    <div><span>Company Size Fit</span><strong>${breakdown.size}/10</strong></div>
+    <div class="bar"><div class="bar-fill" style="width:${breakdown.size*10}%"></div></div>
+    <div><span>Industry Fit</span><strong>${breakdown.industry}/10</strong></div>
+    <div class="bar"><div class="bar-fill" style="width:${breakdown.industry*10}%"></div></div>
+    <div><span>Manual Process Likelihood</span><strong>${breakdown.manual}/10</strong></div>
+    <div class="bar"><div class="bar-fill" style="width:${breakdown.manual*10}%"></div></div>
+    <div><span>Revenue Fit</span><strong>${breakdown.revenue}/10</strong></div>
+    <div class="bar"><div class="bar-fill" style="width:${breakdown.revenue*10}%"></div></div>
+    <div><span>Geographic Fit</span><strong>${breakdown.geo}/10</strong></div>
+    <div class="bar"><div class="bar-fill" style="width:${breakdown.geo*10}%"></div></div>
+    <div style="margin-top:8px;font-size:.95rem;color:var(--text)"><strong>Composite: <span class="${scoreClass(composite)}" style="padding:2px 8px;border-radius:8px">${composite}</span></strong></div>
+  `;
+}
+
+function addLead(e) {
+  e.preventDefault();
+  const d = getFormData();
+  const { composite, breakdown } = calcScore(d.employees, d.industry, d.revenue, d.city);
+  const leads = load();
+  leads.push({ ...d, score: composite, breakdown, id: Date.now() });
+  save(leads);
+  document.getElementById('leadForm').reset();
+  document.getElementById('preview').classList.remove('visible');
+  render();
+  return false;
+}
+
+function deleteLead(id) {
+  save(load().filter(l => l.id !== id));
+  render();
+}
+
+function clearAll() {
+  if (!confirm('Delete all leads?')) return;
+  save([]);
+  render();
+}
+
+let sortKey = 'score', sortDir = -1;
+function setSort(key) {
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = -1; }
+  render();
+}
+
+function render() {
+  const leads = load();
+  leads.sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+
+  // Stats
+  const stats = document.getElementById('stats');
+  if (leads.length) {
+    const high = leads.filter(l => l.score >= 70).length;
+    const med = leads.filter(l => l.score >= 45 && l.score < 70).length;
+    const avg = Math.round(leads.reduce((s, l) => s + l.score, 0) / leads.length);
+    stats.innerHTML = `
+      <div class="stat"><strong>${leads.length}</strong>Total Leads</div>
+      <div class="stat"><strong style="color:var(--green)">${high}</strong>High Priority</div>
+      <div class="stat"><strong style="color:var(--yellow)">${med}</strong>Medium</div>
+      <div class="stat"><strong>${avg}</strong>Avg Score</div>
+    `;
+  } else stats.innerHTML = '';
+
+  document.getElementById('leadCount').textContent = leads.length ? `${leads.length} lead${leads.length>1?'s':''}` : '';
+
+  const wrap = document.getElementById('tableWrap');
+  if (!leads.length) {
+    wrap.innerHTML = '<div class="empty-state"><span>📋</span>No leads yet. Add your first one!</div>';
+    return;
+  }
+
+  const arrow = k => sortKey === k ? (sortDir === -1 ? ' ↓' : ' ↑') : '';
+  wrap.innerHTML = `<table class="lead-table">
+    <thead><tr>
+      <th onclick="setSort('score')">Score${arrow('score')}</th>
+      <th>Priority</th>
+      <th onclick="setSort('name')">Company${arrow('name')}</th>
+      <th onclick="setSort('industry')">Industry${arrow('industry')}</th>
+      <th onclick="setSort('employees')">Size${arrow('employees')}</th>
+      <th onclick="setSort('revenue')">Revenue${arrow('revenue')}</th>
+      <th onclick="setSort('city')">City${arrow('city')}</th>
+      <th>Notes</th>
+      <th></th>
+    </tr></thead>
+    <tbody>${leads.map(l => `<tr>
+      <td><span class="score-badge ${scoreClass(l.score)}">${l.score}</span></td>
+      <td>${priorityLabel(l.score)}</td>
+      <td><strong>${esc(l.name)}</strong></td>
+      <td>${INDUSTRY_LABELS[l.industry] || l.industry}</td>
+      <td>${l.employees.toLocaleString()}</td>
+      <td>$${l.revenue}M</td>
+      <td>${esc(l.city)}</td>
+      <td style="max-width:200px;font-size:.8rem;color:var(--text-dim)">${esc(l.notes||'—')}</td>
+      <td><button class="delete-btn" onclick="deleteLead(${l.id})" title="Delete">✕</button></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function exportCSV() {
+  const leads = load();
+  if (!leads.length) return alert('No leads to export');
+  const rows = [['Score','Priority','Company','Industry','Employees','Revenue ($M)','City','Notes']];
+  leads.sort((a,b) => b.score - a.score).forEach(l => {
+    const pri = l.score >= 70 ? 'High' : l.score >= 45 ? 'Medium' : 'Low';
+    rows.push([l.score, pri, l.name, INDUSTRY_LABELS[l.industry]||l.industry, l.employees, l.revenue, l.city, l.notes||'']);
+  });
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `leads_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+render();
+</script>
+</body>
+</html>
